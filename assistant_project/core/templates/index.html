@@ -1,0 +1,82 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech Captions</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="text">
+        <h1 class="h1">Text-to-Speech Captions</h1>
+        <button class="Play" id="playSpeech">Play Speech</button>
+        <div id="captions" class="captions-container"></div>
+        <button id="toggleTheme" class="button">Enter Your Text</button>
+    </div>    
+
+    <script src="script.js" defer></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("JavaScript Loaded!");
+
+            document.getElementById('toggleTheme').addEventListener('click', toggleTheme);
+            document.getElementById('playSpeech').addEventListener('click', triggerSpeech);
+        });
+
+        function toggleTheme() {
+            let existingStyle = document.getElementById('highContrastStylesheet');
+
+            if (existingStyle) {
+                existingStyle.parentNode.removeChild(existingStyle);
+            } else {
+                let link = document.createElement('link');
+                link.id = 'highContrastStylesheet';
+                link.rel = 'stylesheet';
+                link.href = './css/high_contrast.css';
+                document.head.appendChild(link);
+            }
+
+            const currentTheme = existingStyle ? 'default' : 'high-contrast';
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        function triggerSpeech() {
+            let msg = new SpeechSynthesisUtterance ("Hello, this is your text-to-speech assistant!");
+            window.speechSynthesis.speak(msg);
+        }
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="text">
+        <h1 class="h1">Text-to-Speech</h1>
+        <input type="text" id="textInput" placeholder="Enter text here..." class="input-box">
+        <button id="playSpeech">Convert to Speech</button>
+    </div>    
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById('playSpeech').addEventListener('click', function () {
+                let text = document.getElementById('textInput').value;
+                if (text.trim() === "") {
+                    alert("Please enter some text!");
+                    return;
+                }
+                let msg = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(msg);
+            });
+        });
+    </script>
+</body>
+</html>

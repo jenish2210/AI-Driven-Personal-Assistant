@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>Text-to-Speech Converter</h1>
+    <input type="text" id="textInput" placeholder="Enter text..." class="input-box">
+    
+    <label for="voiceSelect">Choose Voice:</label>
+    <select id="voiceSelect">
+        <option value="female">Female</option>
+        <option value="male">Male</option>
+    </select>
+
+    <label for="rateInput">Speech Rate:</label>
+    <input type="number" id="rateInput" value="150">
+
+    <label for="volumeInput">Volume:</label>
+    <input type="number" id="volumeInput" step="0.1" value="0.9" min="0" max="1">
+
+    <button id="playSpeech">Convert to Speech</button>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

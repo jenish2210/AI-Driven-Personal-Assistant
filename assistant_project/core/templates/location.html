@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Location</title>
+    <script>
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+    
+                    fetch("/send_location/", {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json" 
+                        },
+                        body: JSON.stringify({ latitude: latitude, longitude: longitude })
+                    })
+                    .then(response => response.json())
+                    .then(data => console.log("Location sent:", data))
+                    .catch(error => console.error("Error:", error));
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+    </script>
+    
+</head>
+<body>
+    <h1>Send Your Location</h1>
+    <button onclick="sendLocation()">Send Location</button>
+</body>
+</html>

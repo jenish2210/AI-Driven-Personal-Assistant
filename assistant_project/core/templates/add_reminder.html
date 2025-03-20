@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Set a Reminder</title>
+    <style>
+        body{
+            background-color: aqua;
+            text-align: center;
+            margin: 200px;
+            padding: 10px;
+        
+        }
+
+        form{
+            text-align: center;
+            padding-bottom: 5%;
+        }
+        h1{
+            padding: 10px;
+           
+            
+        }
+        .msg{
+            padding:10px;      
+     }
+        .date{
+            padding-right: 23px;
+            
+        }
+    </style>
+</head>
+<body>
+    <h1 >SET A REMINDER</h1>
+    <form method="POST">
+        <!-- {% csrf_token %} -->
+        
+        <label class="msg" for="message">Message:</label>
+        <input type="text" id="message" name="message" required>
+        <br>
+
+        <label class="date" for="date">Select Date:</label>
+        <input type="date" id="date" name="date" required>
+        <br>
+
+        <label for="time">Select Time:</label>
+        <input type="time" id="time" name="time" required>
+        <br>
+
+        <button type="submit">Set Reminder</button>
+    </form>
+</body>
+</html>

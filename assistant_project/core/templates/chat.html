@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        /* Chatbot UI Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #141313;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h2{
+            color: white;
+        }
+
+        .chat-container {
+            color: rgb(107, 222, 230);
+            width: 400px;
+            margin : auto;
+            margin-top: -2%;
+            background: rgb(0, 0, 0);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgb(0, 247, 247);
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #000000;
+            padding: 10px;
+            background: #000000;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(251, 251, 251, 0.112);
+        }
+        .user-message {
+            text-align: right;
+            color: rgb(251, 251, 251);
+            margin: 5px;
+        }
+        .bot-message {
+            text-align: left;
+            color: rgb(152, 164, 152);
+            margin: 5px;
+        }
+        input {
+            width: 70%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            padding: 10px 15px;
+            margin-left: 5px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+
+        /* AI Avatar Styles */
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .avatar {
+            width: 150px; /* Adjust size */
+            border-radius: 50%;
+            
+        }
+        .eyelid {
+            position: absolute;
+            top: 25%; /* Adjust based on avatar */
+            left: 50%;
+            width: 50px;
+            height: 25px;
+            background-color: #f4f4f4; /* Match skin tone */
+            border-radius: 50%;
+            transform: translate(-50%, 0);
+            animation: blink 4s infinite;
+        }
+        .eyelid.left {
+            left: 38%;
+        }
+        .eyelid.right {
+            left: 62%;
+        }
+        @keyframes blink {
+            0%, 100% { transform: translate(-50%, 0) scaleY(1); }
+            50% { transform: translate(-50%, 0) scaleY(0); } /* Close eyes */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AI Avatar Section -->
+    <h2>AI Chatbot</h2>
+    <div class="avatar-container">
+        {% load static %}
+        <img src="{% static 'images/avatar_open_eyes.png' %}" alt="AI Avatar" class="avatar">
+        <!-- <div class="eyelid left"></div>
+        <div class="eyelid right"></div> -->
+    </div>
+
+    <!-- Chat UI -->
+    <div class="chat-container">
+        <div class="chat-box" id="chat_output">
+            <p><strong>Bot:</strong> Hello! How can I help you?</p>
+        </div>
+
+        <form id="chat_form">
+            {% csrf_token %}
+            <input type="text" id="chat_input" placeholder="Type or speak your message..." required>
+            <button type="submit">Send</button>
+            <button type="button" id="mic">🎤</button>
+        </form>
+    </div>
+
+    <script>
+        // Convert bot response to speech
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                let speech = new SpeechSynthesisUtterance(text);
+                speech.lang = 'en-US';  // Set language
+                speech.rate = 1;  // Adjust speed
+                speech.pitch = 1.2;  // Slightly higher pitch for a natural female voice
+        
+                // Load voices properly
+                let voices = [];
+                function setVoice() {
+                    voices = window.speechSynthesis.getVoices();
+                    let femaleVoice = voices.find(voice => 
+                        voice.name.includes("Female") || 
+                        voice.name.includes("Google UK English Female") || 
+                        voice.name.includes("Google US English")
+                    );
+        
+                    if (femaleVoice) {
+                        speech.voice = femaleVoice;
+                    }
+        
+                    window.speechSynthesis.speak(speech);
+                }
+        
+                // Delay voice selection to ensure voices are loaded
+                if (voices.length === 0) {
+                    window.speechSynthesis.onvoiceschanged = setVoice;
+                } else {
+                    setVoice();
+                }
+            } 
+            else {
+                console.error("Text-to-Speech not supported");
+    }
+}
+
+
+        document.getElementById("chat_form").addEventListener("submit", function(event) {
+            event.preventDefault();  // Prevent page reload
+            
+            let message = document.getElementById("chat_input").value;
+            let chatBox = document.getElementById("chat_output");
+            let csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+            // Append user message
+            let userMessage = document.createElement("p");
+            userMessage.className = "user-message";
+            userMessage.innerHTML = "<strong>You:</strong> " + message;
+            chatBox.appendChild(userMessage);
+
+            // Clear input field
+            document.getElementById("chat_input").value = "";
+
+            // Send AJAX request
+            fetch("/chatbot/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({ user_input: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                let botMessage = document.createElement("p");
+                botMessage.className = "bot-message";
+                botMessage.innerHTML = "<strong>Bot:</strong> " + data.response;
+                chatBox.appendChild(botMessage);
+
+                // Convert bot response to speech
+                speak(data.response);
+
+                // Auto-scroll chatbox to bottom
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        // 🎤 Voice Input (Speech-to-Text)
+        document.getElementById("mic").addEventListener("click", function() {
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                let speechToText = event.results[0][0].transcript;
+                document.getElementById("chat_input").value = speechToText;
+            };
+        });
+    </script>
+
+</body>
+</html>

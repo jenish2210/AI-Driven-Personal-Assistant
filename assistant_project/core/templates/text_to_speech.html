@@ -1,0 +1,18 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+</head>
+<body>
+    <h2>Enter Text for Speech:</h2>
+    <form action="/text_to_speech/" method="POST">
+        {% csrf_token %}
+        <input type="text" name="text" placeholder="Type something..." required>
+        <button type="submit">Speak</button>
+    </form>
+</body>
+</html>
