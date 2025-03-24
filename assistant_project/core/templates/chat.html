@@ -126,42 +126,21 @@
     </div>
 
     <script>
-        // Convert bot response to speech
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                let speech = new SpeechSynthesisUtterance(text);
-                speech.lang = 'en-US';  // Set language
-                speech.rate = 1;  // Adjust speed
-                speech.pitch = 1.2;  // Slightly higher pitch for a natural female voice
-        
-                // Load voices properly
-                let voices = [];
-                function setVoice() {
-                    voices = window.speechSynthesis.getVoices();
-                    let femaleVoice = voices.find(voice => 
-                        voice.name.includes("Female") || 
-                        voice.name.includes("Google UK English Female") || 
-                        voice.name.includes("Google US English")
-                    );
-        
-                    if (femaleVoice) {
-                        speech.voice = femaleVoice;
-                    }
-        
-                    window.speechSynthesis.speak(speech);
-                }
-        
-                // Delay voice selection to ensure voices are loaded
-                if (voices.length === 0) {
-                    window.speechSynthesis.onvoiceschanged = setVoice;
-                } else {
-                    setVoice();
-                }
-            } 
-            else {
-                console.error("Text-to-Speech not supported");
+       // Convert bot response to speech with a female voice
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        let speech = new SpeechSynthesisUtterance(text);
+        let voices = speechSynthesis.getVoices();
+        speech.voice = voices.find(voice => voice.name.includes("Female")) || voices[0]; // Use a female voice if available
+        speech.lang = 'en-US';
+        speech.rate = 1;
+        speech.pitch = 1.2;  // Slightly higher pitch
+        window.speechSynthesis.speak(speech);
+    } else {
+        console.error("Text-to-Speech not supported");
     }
 }
+
 
 
         document.getElementById("chat_form").addEventListener("submit", function(event) {

@@ -477,13 +477,52 @@ def add_reminder(request):
 
 # #================ GPT ======================================================================
 
+# import json
+# import requests
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.shortcuts import render
+
+# GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"  # Replace with your API key
+
+# @csrf_exempt
+# def chatbot(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode("utf-8"))
+#             user_message = data.get("user_input", "")
+
+#             # Send request to Google Gemini API
+#             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+#             headers = {"Content-Type": "application/json"}
+#             payload = {
+#                 "contents": [{"parts": [{"text": user_message}]}]
+#             }
+
+#             response = requests.post(gemini_url, headers=headers, json=payload)
+#             response_data = response.json()
+
+#             # Extract AI response
+#             bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Sorry, I didn't understand that.")
+
+#             return JsonResponse({"response": bot_response})
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
+
+#     return render(request, "chat.html")
+
+
+#=================================================================================================================
+
+
+
 import json
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 
-GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"  # Replace with your API key
+GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"
 
 @csrf_exempt
 def chatbot(request):
@@ -492,18 +531,16 @@ def chatbot(request):
             data = json.loads(request.body.decode("utf-8"))
             user_message = data.get("user_input", "")
 
-            # Send request to Google Gemini API
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+            # Call Gemini AI API
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0:generateContent?key={GEMINI_API_KEY}"
             headers = {"Content-Type": "application/json"}
-            payload = {
-                "contents": [{"parts": [{"text": user_message}]}]
-            }
+            payload = {"contents": [{"parts": [{"text": user_message}]}]}
 
-            response = requests.post(gemini_url, headers=headers, json=payload)
+            response = requests.post(url, headers=headers, json=payload)
             response_data = response.json()
 
             # Extract AI response
-            bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Sorry, I didn't understand that.")
+            bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure about that.")
 
             return JsonResponse({"response": bot_response})
         except Exception as e:
