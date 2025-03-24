@@ -72,6 +72,7 @@ from .views import chatbot
 
 
 urlpatterns = [
+    path("", home, name="home"), 
     path('text_to_speech/', text_to_speech_view),
     path('voice/', voice_command_view),
     path('speech/', speech_to_text_view),

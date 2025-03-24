@@ -547,3 +547,15 @@ def chatbot(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return render(request, "chat.html")
+
+
+
+
+#============================================================================================
+
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, "home.html")
+
