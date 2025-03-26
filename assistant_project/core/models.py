@@ -21,12 +21,14 @@ from django.db import models
 #     def __str__(self):
 #         return self.message
 
+from django.utils import timezone
 from django.db import models
-from django.utils.timezone import now  # Import timezone utility
 
 class Reminder(models.Model):
-    message = models.TextField(default="Default Reminder")  # Ensure a default value
-    scheduled_time = models.DateTimeField(default=now)  # Default to current time
+    text = models.CharField(max_length=255)
+    time = models.DateTimeField(default=timezone.now)  # Set default to current time
+
+
 
 
 
@@ -75,3 +77,20 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"User: {self.user_message} | Bot: {self.bot_response}"
+
+
+
+from django.db import models
+from django.utils import timezone  # Make sure this is imported
+
+class Task(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)  # ✅ Ensure this is correct
+
+    def __str__(self):
+        return self.title
+
+    
+

@@ -6,21 +6,18 @@
     <title>Speech to Text</title>
 </head>
 <body>
-
-    <h2>Speech to Text Converter</h2>
+    <h2>🎤 Speech-to-Text</h2>
     <button id="startRecording">Start Recording</button>
-    <p>Output: <span id="outputText"></span></p>
+    <p id="outputText">Your text will appear here...</p>
 
     <script>
-        document.getElementById("startRecording").addEventListener("click", function () {
-            fetch("/speech-to-text/", { method: "POST" })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("outputText").innerText = data.text || "Error: " + data.error;
-                })
-                .catch(error => console.error("Error:", error));
-        });
+        document.getElementById("startRecording").onclick = function() {
+            fetch("{% url 'speech_to_text_view' %}", { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("outputText").innerText = data.text || data.error;
+            });
+        };
     </script>
-
 </body>
 </html>

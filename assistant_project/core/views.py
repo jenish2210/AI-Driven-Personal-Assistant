@@ -106,12 +106,14 @@ def speech_to_text_view(request):
 from django.shortcuts import render
 from django.http import JsonResponse
 import pyttsx3
-# def text_to_speech_view(request):
-#     return render(request, "text_to_speech.html")
+
 def text_to_speech_view(request):
+    print("View accessed!")  # Debugging line
+
     if request.method == "POST":
         text = request.POST.get("text", "Please enter some text.")  # Get input from user
-    
+        print(f"Text received: {text}")  # Debugging line
+
         engine = pyttsx3.init()
         engine.say(text)
         engine.runAndWait()
@@ -119,6 +121,7 @@ def text_to_speech_view(request):
         return JsonResponse({"message": "Speech generated successfully"})
 
     return render(request, "text_to_speech.html")  # Render HTML page for user input
+
 
 
 #========================================================================================================================================
@@ -367,7 +370,7 @@ from django.http import JsonResponse
 
 def send_sms(phone_number, message):  # Accepts 2 parameters
     TWILIO_ACCOUNT_SID = "ACbbc929b41e85afc1bc852ed7c14c5cb2"
-    TWILIO_AUTH_TOKEN = "912de4a62ed3b7ad7988bc4ddaf62f70"
+    TWILIO_AUTH_TOKEN = "bad0002b4e42c9b0f5bf7e2333c18126"
     TWILIO_PHONE_NUMBER = "+18562927234" # Your Twilio number
 
     try:
@@ -428,7 +431,7 @@ from django.http import JsonResponse
 
 def send_msg(request):
     TWILIO_ACCOUNT_SID = "ACbbc929b41e85afc1bc852ed7c14c5cb2"
-    TWILIO_AUTH_TOKEN = "912de4a62ed3b7ad7988bc4ddaf62f70"
+    TWILIO_AUTH_TOKEN = "bad0002b4e42c9b0f5bf7e2333c18126"
     TWILIO_PHONE_NUMBER = "+18562927234"  # Your Twilio number
 
     recipient_number = "+919043949382"  # Replace with user input
@@ -454,67 +457,44 @@ def send_msg(request):
 # #=======================================================
 
 from django.shortcuts import render
-from django.utils.timezone import make_aware
-from datetime import datetime
+from django.http import JsonResponse
 from .models import Reminder
+from datetime import datetime
 
 def add_reminder(request):
     if request.method == "POST":
-        message = request.POST.get("message")
-        date_str = request.POST.get("date")  # Format: YYYY-MM-DD
-        time_str = request.POST.get("time")  # Format: HH:MM
+        reminder_text = request.POST.get("reminder_text", "")
+        reminder_time = request.POST.get("reminder_time", "")
 
-        # Combine date and time
-        datetime_str = f"{date_str} {time_str}"
-        scheduled_time = make_aware(datetime.strptime(datetime_str, "%Y-%m-%d %H:%M"))
+        if reminder_text and reminder_time:
+            reminder_time = datetime.strptime(reminder_time, "%Y-%m-%dT%H:%M")  # Convert string to datetime
+            reminder = Reminder.objects.create(text=reminder_text, time=reminder_time)
 
-        # Save to the database
-        Reminder.objects.create(message=message, scheduled_time=scheduled_time)
+            return JsonResponse({"message": "Reminder added!", "reminder": {
+                "text": reminder.text,
+                "time": reminder.time.strftime("%Y-%m-%d %H:%M")
+            }})
 
-        return render(request, "success.html", {"message": "Reminder Set Successfully!"})
+    reminders = Reminder.objects.all().order_by("time")
+    return render(request, "home.html", {"reminders": reminders})
 
-    return render(request, "add_reminder.html")
+
+
+#===========================================================================
+
+from django.http import JsonResponse
+from .models import Reminder
+
+def delete_reminder(request, reminder_id):
+    try:
+        reminder = Reminder.objects.get(id=reminder_id)
+        reminder.delete()
+        return JsonResponse({"message": "Reminder deleted successfully!"})
+    except Reminder.DoesNotExist:
+        return JsonResponse({"error": "Reminder not found!"}, status=404)
+
 
 # #================ GPT ======================================================================
-
-# import json
-# import requests
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# from django.shortcuts import render
-
-# GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"  # Replace with your API key
-
-# @csrf_exempt
-# def chatbot(request):
-#     if request.method == "POST":
-#         try:
-#             data = json.loads(request.body.decode("utf-8"))
-#             user_message = data.get("user_input", "")
-
-#             # Send request to Google Gemini API
-#             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
-#             headers = {"Content-Type": "application/json"}
-#             payload = {
-#                 "contents": [{"parts": [{"text": user_message}]}]
-#             }
-
-#             response = requests.post(gemini_url, headers=headers, json=payload)
-#             response_data = response.json()
-
-#             # Extract AI response
-#             bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Sorry, I didn't understand that.")
-
-#             return JsonResponse({"response": bot_response})
-#         except Exception as e:
-#             return JsonResponse({"error": str(e)}, status=500)
-
-#     return render(request, "chat.html")
-
-
-#=================================================================================================================
-
-
 
 import json
 import requests
@@ -522,7 +502,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 
-GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"
+GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"  # Replace with your API key
 
 @csrf_exempt
 def chatbot(request):
@@ -531,16 +511,18 @@ def chatbot(request):
             data = json.loads(request.body.decode("utf-8"))
             user_message = data.get("user_input", "")
 
-            # Call Gemini AI API
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0:generateContent?key={GEMINI_API_KEY}"
+            # Send request to Google Gemini API
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
             headers = {"Content-Type": "application/json"}
-            payload = {"contents": [{"parts": [{"text": user_message}]}]}
+            payload = {
+                "contents": [{"parts": [{"text": user_message}]}]
+            }
 
-            response = requests.post(url, headers=headers, json=payload)
+            response = requests.post(gemini_url, headers=headers, json=payload)
             response_data = response.json()
 
             # Extract AI response
-            bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure about that.")
+            bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "Sorry, I didn't understand that.")
 
             return JsonResponse({"response": bot_response})
         except Exception as e:
@@ -549,13 +531,112 @@ def chatbot(request):
     return render(request, "chat.html")
 
 
+#=================================================================================================================
+
+
+
+# import json
+# import requests
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.shortcuts import render
+
+# GEMINI_API_KEY = "AIzaSyCFiPRO_jSXOZH5gnMvKE98SzsGu_6O-Tk"
+
+# @csrf_exempt
+# def chatbot(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode("utf-8"))
+#             user_message = data.get("user_input", "")
+
+#             # Call Gemini AI API
+#             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0:generateContent?key={GEMINI_API_KEY}"
+#             headers = {"Content-Type": "application/json"}
+#             payload = {"contents": [{"parts": [{"text": user_message}]}]}
+
+#             response = requests.post(url, headers=headers, json=payload)
+#             response_data = response.json()
+
+#             # Extract AI response
+#             bot_response = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "I'm not sure about that.")
+
+#             return JsonResponse({"response": bot_response})
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
+
+#     return render(request, "chat.html")
+
+
 
 
 #============================================================================================
 
 
-from django.shortcuts import render
 
 def home(request):
     return render(request, "home.html")
+
+
+
+
+#===================================================================================================
+
+   # TASK MANAGER
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Task
+from .forms import TaskForm
+
+@login_required
+def task_list(request):
+    tasks = Task.objects.filter(user=request.user)
+    return render(request, 'tasks/task_list.html', {'tasks': tasks})
+
+@login_required
+def task_create(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            return redirect('task_list')
+    else:
+        form = TaskForm()
+    return render(request, 'tasks/task_form.html', {'form': form})
+
+@login_required
+def task_update(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('task_list')
+    else:
+        form = TaskForm(instance=task)
+    return render(request, 'tasks/task_form.html', {'form': form})
+
+@login_required
+def task_delete(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('task_list')
+    return render(request, 'tasks/task_confirm_delete.html', {'task': task})
+
+
+
+from django.shortcuts import render
+
+def task_manager(request):
+    return render(request, 'task_manager.html')  # Ensure you have a template named task_manager.html
+
+
+
+
 

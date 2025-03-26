@@ -8,11 +8,12 @@
     <title>Text to Speech</title>
 </head>
 <body>
-    <h2>Enter Text for Speech:</h2>
-    <form action="/text_to_speech/" method="POST">
+    <h2>Text for Speech</h2>
+    <form method="POST" action="{% url 'text_to_speech_view' %}">
         {% csrf_token %}
-        <input type="text" name="text" placeholder="Type something..." required>
+        <input type="text" name="text" placeholder="Enter text to convert to speech">
         <button type="submit">Speak</button>
     </form>
+    
 </body>
 </html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+</head>
+<body>
+    <h1>Task Manager</h1>
+    <a href="{% url 'add_task' %}">Add New Task</a>
+    <ul>
+        {% for task in tasks %}
+            <li>
+                <strong>{{ task.title }}</strong> - {{ task.priority }}
+                {% if not task.completed %}
+                    <a href="{% url 'complete_task' task.id %}">Mark as Done</a>
+                {% endif %}
+                <a href="{% url 'delete_task' task.id %}" style="color:red;">Delete</a>
+            </li>
+        {% empty %}
+            <p>No tasks available.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>
