@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Personal Assistant</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        /* @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap'); */
+        </style>
+    <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Kanit", sans-serif;
+            font-weight: 500;
+            font-style: normal;
             text-align: center;
             background-color: #f4f4f4;
             margin: 0;
@@ -19,38 +25,56 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 0px 10px rgb(0, 247, 247);
+        
+            /*  */
         }
         h1 {
             color: #333;
+            font-family: "Kanit", sans-serif;
+            font-weight: 3000;
+            font-style: normal;
         }
+
+
+  
+
+            
+            
+        
+
         .button-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
             margin-top: 20px;
+            padding: 5%;
+            
         }
         .btn {
             padding: 12px;
             width: 100%;
             border: none;
             border-radius: 5px;
-            background-color: #007bff;
+            background-color: rgb(0, 247, 247);
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.886);
+        
         }
         .btn:hover {
-            background-color: #0056b3;
+            background-color: #1d55a4;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>AI Personal Assistant</h1>
+        <h1>CARE MATE</h1>
+        <h2>AI Personal Assistant</h2>
         <p>Welcome to your AI-powered assistant! Choose a feature below:</p>
         
         <div class="button-container">
@@ -93,139 +117,142 @@
             
         </div>
         <script>
-            document.addEventListener("click", function(event) {
-                if (event.target.classList.contains("delete-btn")) {
-                    let reminderId = event.target.dataset.id;
-            
-                    fetch(`/delete-reminder/${reminderId}/`, {
-                        method: "DELETE",
-                        headers: {
-                            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.message) {
-                            event.target.parentElement.remove(); // Remove from UI
-                        }
-                    });
-                }
-            });
-            </script>
-            
-        
-        <script>
-        document.getElementById("reminder-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-        
-            let formData = new FormData(this);
-        
-            fetch("{% url 'add_reminder' %}", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.reminder) {
-                    let reminderList = document.getElementById("reminder-list");
-                    let newReminder = document.createElement("li");
-                    newReminder.textContent = `${data.reminder.text} - ${data.reminder.time}`;
-                    reminderList.appendChild(newReminder);
-                }
-            });
-        
-            this.reset(); // Clear input fields after submission
-        });
+            // ✅ Load existing reminders when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+    updateReminderList();
+});
+
+// ✅ Handle Reminder Form Submission
+document.getElementById("reminder-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    let text = document.getElementById("reminder-text").value;
+    let time = document.getElementById("reminder-time").value;
+
+    if (text && time) {
+        let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+        reminders.push({ text, time });
+        localStorage.setItem("reminders", JSON.stringify(reminders));
+
+        updateReminderList(); // Update UI
+    }
+
+    this.reset(); // Clear form inputs
+});
+
+// ✅ Function to Update Reminder List
+function updateReminderList() {
+    let reminderList = document.getElementById("reminder-list");
+    reminderList.innerHTML = ""; // Clear list before updating
+
+    let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+    reminders.forEach((reminder, index) => {
+        let listItem = document.createElement("li");
+        listItem.textContent = `${reminder.text} - ${reminder.time}`;
+
+        let deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "❌";
+        deleteBtn.dataset.id = index;
+        deleteBtn.classList.add("delete-btn");
+
+        listItem.appendChild(deleteBtn);
+        reminderList.appendChild(listItem);
+    });
+}
+
+// ✅ Handle Reminder Deletion
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("delete-btn")) {
+        let reminderIndex = event.target.dataset.id;
+        let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+
+        reminders.splice(reminderIndex, 1); // Remove reminder from list
+        localStorage.setItem("reminders", JSON.stringify(reminders));
+
+        updateReminderList(); // Refresh UI
+    }
+});
+
+// ✅ Function to Check & Notify Reminders
+function checkReminders() {
+    let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+    let currentTime = new Date().toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:MM
+
+    reminders.forEach((reminder, index) => {
+        if (reminder.time === currentTime) {
+            alert(`⏰ Reminder: ${reminder.text}`);
+
+            // 🎤 Speak the Reminder
+            let speech = new SpeechSynthesisUtterance(`Reminder: ${reminder.text}`);
+            window.speechSynthesis.speak(speech);
+
+            reminders.splice(index, 1); // Remove reminder after notification
+        }
+    });
+
+    localStorage.setItem("reminders", JSON.stringify(reminders));
+}
+
+// ✅ Check for Reminders Every Minute
+setInterval(checkReminders, 60000);
+
+// ✅ Speech-to-Text for Adding Reminders
+document.getElementById("voice-reminder-btn").addEventListener("click", function () {
+    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+
+    recognition.onstart = function () {
+        console.log("Listening for a reminder...");
+    };
+
+    recognition.onresult = function (event) {
+        let speechText = event.results[0][0].transcript;
+        console.log("Recognized text:", speechText);
+
+        // Extract time and text from the voice command
+        let reminderTime = extractTime(speechText);
+        let reminderText = speechText.replace(reminderTime, "").trim();
+
+        if (reminderTime && reminderText) {
+            let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
+            reminders.push({ text: reminderText, time: reminderTime });
+            localStorage.setItem("reminders", JSON.stringify(reminders));
+
+            updateReminderList(); // Update UI after adding
+        } else {
+            alert("Couldn't understand the time. Please try again.");
+        }
+    };
+
+    recognition.start();
+});
+
+// ✅ Extract Time from Spoken Reminder
+function extractTime(speechText) {
+    let timeRegex = /\b(\d{1,2}(:\d{2})?\s?(AM|PM)?)\b/i;
+    let match = speechText.match(timeRegex);
+
+    if (match) {
+        let timeStr = match[1].toUpperCase();
+
+        let date = new Date();
+        let [hour, minute] = timeStr.includes(":") ? timeStr.split(":") : [timeStr, "00"];
+
+        hour = parseInt(hour);
+        minute = parseInt(minute);
+
+        if (timeStr.includes("PM") && hour < 12) hour += 12;
+        if (timeStr.includes("AM") && hour === 12) hour = 0;
+
+        date.setHours(hour, minute);
+        return date.toISOString().slice(0, 16); // Convert to YYYY-MM-DDTHH:MM format
+    }
+    return null;
+}
+
         </script>
-        <script>
-            function checkReminders() {
-                let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
-                let currentTime = new Date().toISOString().slice(0, 16); // Current time in "YYYY-MM-DDTHH:MM" format
-            
-                reminders.forEach((reminder, index) => {
-                    if (reminder.time === currentTime) {
-                        alert(`⏰ Reminder: ${reminder.text}`);
-                        reminders.splice(index, 1); // Remove reminder after showing alert
-                    }
-                });
-            
-                localStorage.setItem("reminders", JSON.stringify(reminders));
-            }
-            
-            setInterval(checkReminders, 60000); // Check reminders every 60 seconds
-            
-            document.getElementById("reminder-form").addEventListener("submit", function(event) {
-                event.preventDefault();
-            
-                let text = document.getElementById("reminder-text").value;
-                let time = document.getElementById("reminder-time").value;
-                
-                if (text && time) {
-                    let reminders = JSON.parse(localStorage.getItem("reminders")) || [];
-                    reminders.push({ text, time });
-                    localStorage.setItem("reminders", JSON.stringify(reminders));
-                }
-            });
-            </script>
-            <script>
-                document.getElementById("voice-reminder-btn").addEventListener("click", function() {
-                    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                    recognition.lang = "en-US";
-                
-                    recognition.onstart = function() {
-                        console.log("Listening for a reminder...");
-                    };
-                
-                    recognition.onresult = function(event) {
-                        let speechText = event.results[0][0].transcript;
-                        console.log("Recognized text:", speechText);
-                
-                        // Extract time and text from the voice command
-                        let reminderTime = extractTime(speechText);
-                        let reminderText = speechText.replace(reminderTime, "").trim();
-                
-                        if (reminderTime && reminderText) {
-                            document.getElementById("reminder-text").value = reminderText;
-                            document.getElementById("reminder-time").value = reminderTime;
-                            document.getElementById("reminder-form").submit(); // Auto-submit the form
-                        } else {
-                            alert("Couldn't understand the time. Please try again.");
-                        }
-                    };
-                
-                    recognition.start();
-                });
-                
-                // Function to extract time from the spoken text
-                function extractTime(speechText) {
-                    let timeRegex = /\b(\d{1,2}(:\d{2})?\s?(AM|PM)?)\b/i;
-                    let match = speechText.match(timeRegex);
-                    
-                    if (match) {
-                        let timeStr = match[1].toUpperCase();
-                        
-                        // Convert to 24-hour format if necessary
-                        let date = new Date();
-                        let [hour, minute] = timeStr.includes(":") ? timeStr.split(":") : [timeStr, "00"];
-                        
-                        hour = parseInt(hour);
-                        minute = parseInt(minute);
-                
-                        if (timeStr.includes("PM") && hour < 12) hour += 12;
-                        if (timeStr.includes("AM") && hour === 12) hour = 0;
-                
-                        date.setHours(hour, minute);
-                        return date.toISOString().slice(0, 16); // Convert to "YYYY-MM-DDTHH:MM" format
-                    }
-                    return null;
-                }
-                </script>
-                
-            
         
+         
         
     </div>
 

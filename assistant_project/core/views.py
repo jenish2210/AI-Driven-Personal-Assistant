@@ -636,7 +636,66 @@ from django.shortcuts import render
 def task_manager(request):
     return render(request, 'task_manager.html')  # Ensure you have a template named task_manager.html
 
+#==============================================================================================================================
+
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from .models import Reminder
+
+def delete_reminder(request, reminder_id):
+    if request.method == "DELETE":
+        reminder = get_object_or_404(Reminder, id=reminder_id)
+        reminder.delete()
+        return JsonResponse({"message": "Reminder deleted successfully"})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 
+from django.http import JsonResponse
+from .models import Reminder
 
+def get_reminders(request):
+    reminders = list(Reminder.objects.values())
+    return JsonResponse({"reminders": reminders})
+
+
+from django.shortcuts import render, redirect
+from .models import Task
+
+def add_task(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        priority = request.POST.get("priority", 1)  # Default priority is 1
+        completed = False  # Default to False
+
+        # Ensure priority is an integer
+        try:
+            priority = int(priority)
+        except ValueError:
+            priority = 1  # Set default if conversion fails
+
+        Task.objects.create(title=title, priority=priority, completed=completed)
+        return redirect("task_manager")  # Redirect to the task manager page
+
+    return render(request, "add_task.html")
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Task
+
+def complete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.completed = True
+    task.save()
+    return redirect("task_manager")  # Redirect back to task manager
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Task
+
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.delete()
+    return redirect("task_manager")  # Redirect back to task manager

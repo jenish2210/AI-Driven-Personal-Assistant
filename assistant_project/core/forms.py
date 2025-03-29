@@ -1,8 +1,12 @@
 from django import forms
 from .models import Task
 
+from django import forms
+from .models import Task
+
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'due_date']  # ✅ Removed 'completed'
+        fields = ['title', 'priority', 'completed', 'due_date', 'description']
+
 

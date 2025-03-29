@@ -80,6 +80,11 @@ from .views import text_to_speech_view  # Import the view
 
 
 
+from .views import add_reminder, get_reminders, delete_reminder
+
+
+from . import views  # Ensure views.py is imported
+
 
 urlpatterns = [
     path("", home, name="home"),  # Home page
@@ -88,10 +93,17 @@ urlpatterns = [
     path('task-manager/', views.task_manager, name='task_manager'),
     path('text_to_speech/', text_to_speech_view, name='text_to_speech_view'), 
     path("speech_to_text/", speech_to_text_view, name="speech_to_text_view"),
-    path('add-reminder/', add_reminder, name='add_reminder'),
-    path("delete-reminder/<int:reminder_id>/", delete_reminder, name="delete_reminder"),
+    path("add_reminder/", add_reminder, name="add_reminder"),
+    path("get_reminders/", get_reminders, name="get_reminders"),
+    path("delete_reminder/<int:reminder_id>/", delete_reminder, name="delete_reminder"),
+    path('add-task/', views.add_task, name='add_task'),  # ✅ This should exist
+    path('complete-task/<int:task_id>/', views.complete_task, name='complete_task'),
+    path('delete-task/<int:task_id>/', views.delete_task, name='delete_task'),
+    path('task-manager/', views.task_manager, name='task_manager'),
+    
 
 ]
+
 # urlpatterns = [
 #     path("", home, name="home"), 
 #     path("chatbot/", chatbot, name="chatbot"),
