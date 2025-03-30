@@ -4,20 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech to Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #output {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h2>🎤 Speech-to-Text</h2>
-    <button id="startRecording">Start Recording</button>
-    <p id="outputText">Your text will appear here...</p>
+
+    <h2>Speech to Text Converter</h2>
+    <button onclick="startSpeechRecognition()">🎤 Start Listening</button>
+    
+    <p id="output">Your speech will appear here...</p>
 
     <script>
-        document.getElementById("startRecording").onclick = function() {
-            fetch("{% url 'speech_to_text_view' %}", { method: "POST" })
+        function startSpeechRecognition() {
+            fetch("{% url 'speech_to_text_view' %}")  // Update with your Django URL
             .then(response => response.json())
             .then(data => {
-                document.getElementById("outputText").innerText = data.text || data.error;
+                if (data.text) {
+                    document.getElementById("output").innerText = "Recognized Text: " + data.text;
+                } else {
+                    document.getElementById("output").innerText = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                document.getElementById("output").innerText = "Error connecting to the server.";
+                console.error("Error:", error);
             });
-        };
+        }
     </script>
+
 </body>
 </html>

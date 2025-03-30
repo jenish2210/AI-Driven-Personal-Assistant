@@ -6,14 +6,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text to Speech</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgb(0, 191, 255);
+            max-width: 400px;
+            margin: auto;
+        }
+        input, button, select {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            
+            
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .dark-mode {
+            background: #222;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <h2>Text for Speech</h2>
-    <form method="POST" action="{% url 'text_to_speech_view' %}">
-        {% csrf_token %}
-        <input type="text" name="text" placeholder="Enter text to convert to speech">
-        <button type="submit">Speak</button>
-    </form>
-    
+    <div class="container">
+        <h2>Text to Speech</h2>
+        <input type="text" id="text" placeholder="Enter text to speak">
+        
+        <label>Voice:</label>
+        <select id="voiceSelect"></select>
+
+        <label>Rate:</label>
+        <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+        
+        <label>Pitch:</label>
+        <input type="range" id="pitch" min="0" max="2" step="0.1" value="1">
+
+        <div class="controls">
+            <button onclick="speak()">🔊 Speak</button>
+            <button onclick="pause()">⏸ Pause</button>
+            <button onclick="resume()">▶ Resume</button>
+        </div>
+
+        <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+    </div>
+
+    <script>
+        let synth = window.speechSynthesis;
+        let voices = [];
+
+        function loadVoices() {
+            voices = synth.getVoices();
+            let voiceSelect = document.getElementById("voiceSelect");
+            voiceSelect.innerHTML = "";
+            voices.forEach((voice, index) => {
+                let option = document.createElement("option");
+                option.value = index;
+                option.textContent = voice.name + " (" + voice.lang + ")";
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        function speak() {
+            let text = document.getElementById("text").value;
+            if (!text) return alert("Please enter text!");
+
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = voices[document.getElementById("voiceSelect").value];
+            utterance.rate = document.getElementById("rate").value;
+            utterance.pitch = document.getElementById("pitch").value;
+            synth.speak(utterance);
+        }
+
+        function pause() {
+            synth.pause();
+        }
+
+        function resume() {
+            synth.resume();
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    </script>
 </body>
 </html>
+
