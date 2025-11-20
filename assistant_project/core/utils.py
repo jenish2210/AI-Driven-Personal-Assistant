@@ -52,29 +52,31 @@ def process_voice_command(timeout=5, phrase_time_limit=8):
         return f"Audio recognition error: {e}"
 
 # --- Text-to-Speech (TTS) ------------------------------------------------
+
+# core/utils_tts.py
+import os
+import time
+import warnings
+from gtts import gTTS
+
 def speak(text, lang="en"):
     """
-    Convert text to speech and attempt to play it.
-    This function tries to import gTTS and pygame when called.
-    If playback is not possible, it will save the audio file and then remove it.
+    Generate an MP3 file from text using gTTS.
+    Returns the file path so Django views can serve it.
+    Safe for deployment (does not try to open/play audio on server).
     """
-    # Lazy import of gTTS
-    try:
-        from gtts import gTTS
-    except Exception as e:
-        warnings.warn(f"gTTS not available: {e}", RuntimeWarning)
-        # fallback: just print the text so user sees output
-        print("[TTS disabled] " + text)
-        return
-
-    # create a temporary filename
+    # generate unique filename
     filename = f"tts_{int(time.time())}.mp3"
+    filepath = os.path.join("media", filename)
+
     try:
         tts = gTTS(text=text, lang=lang)
-        tts.save(filename)
+        tts.save(filepath)
+        return filepath  # return file path for Django FileResponse
+
     except Exception as e:
         warnings.warn(f"Failed to generate TTS audio: {e}", RuntimeWarning)
-        return
+        return None
 
     # Try to play with pygame if available
     try:
